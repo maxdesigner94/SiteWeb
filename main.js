@@ -48,7 +48,7 @@ const particlesMaterial = new THREE.PointsMaterial({
     size: 0.03,      // <-- LEGGERMENTE più grandi dell'originale (0.025), ma eleganti
     color: 0xff00ff, // <-- NUOVO COLORE: Arancione Elettrico/Corallo per massimo contrasto
     transparent: true,
-    opacity: 0.95,    // <-- Opacità originale
+    opacity: 1.0,    // <-- Opacità originale
     blending: THREE.AdditiveBlending
 });
 
