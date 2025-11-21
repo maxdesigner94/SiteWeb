@@ -2,16 +2,16 @@
 gsap.registerPlugin(ScrollTrigger);
 
 // =================================================================
-// PARTE 1: SETUP THREE.JS
+// PARTE 1: SETUP THREE.JS (REAL 3D + LIGHTING)
 // =================================================================
 
 const canvas = document.querySelector('#webgl-container');
 const scene = new THREE.Scene();
 
-// Colore Sfondo: Grigio-Azzurro Tecnico (lo stesso del CSS)
-const bgColor = 0xe8ecf0;
+// 1. NUOVO SFONDO "GHOST WHITE"
+const bgColor = 0xf3f5f8; 
 scene.background = new THREE.Color(bgColor); 
-scene.fog = new THREE.FogExp2(bgColor, 0.002);
+scene.fog = new THREE.FogExp2(bgColor, 0.003); // Nebbia leggermente più densa per fondere le sfere lontane
 
 const sizes = {
     width: window.innerWidth,
@@ -19,7 +19,7 @@ const sizes = {
 };
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-camera.position.z = 5;
+camera.position.z = 6; // Camera leggermente più indietro per vedere il volume
 scene.add(camera);
 
 const renderer = new THREE.WebGLRenderer({
@@ -29,62 +29,82 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; // Abilitiamo le ombre
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 
-// --- CREAZIONE OGGETTO 3D CON GRADIENTE ---
+// --- LUCI (ESSENZIALI PER IL 3D) ---
+// Senza luci, le sfere sembrerebbero cerchi piatti.
 
-// 1. Riduciamo il numero per pulizia
-const particlesCount = 1200; // <-- RIDOTTO DA 3000 A 1200
+// Luce Ambientale (Base luminosa morbida)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
 
-const particlesGeometry = new THREE.BufferGeometry();
-const posArray = new Float32Array(particlesCount * 3);
-const colorsArray = new Float32Array(particlesCount * 3); // Array per i colori individuali
+// Luce Direzionale (Come il sole: crea luci e ombre sulle sfere)
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(5, 5, 5); // La luce arriva da in alto a destra
+scene.add(dirLight);
 
-// Definiamo i due colori del gradiente (Stessi del CSS .accent-text)
-const colorInside = new THREE.Color(0x0066ff); // Blu Elettrico
-const colorOutside = new THREE.Color(0x00c9a7); // Verde Acqua (Teal)
+// Luce d'accento bluastra dal basso (per effetto "Tech")
+const spotLight = new THREE.PointLight(0x0066ff, 0.5);
+spotLight.position.set(-5, -5, 2);
+scene.add(spotLight);
 
-for(let i = 0; i < particlesCount * 3; i+=3) {
-    // Posizione X, Y, Z
-    // Allarghiamo un po' la X per apprezzare meglio il gradiente
-    const x = (Math.random() - 0.5) * 18; 
-    const y = (Math.random() - 0.5) * 10;
-    const z = (Math.random() - 0.5) * 10;
 
-    posArray[i] = x;
-    posArray[i+1] = y;
-    posArray[i+2] = z;
+// --- CREAZIONE SFERE 3D (INSTANCED MESH) ---
+// Usiamo InstancedMesh per renderizzare 1000 sfere vere senza rallentare il PC
 
-    // CALCOLO DEL GRADIENTE
-    // Normalizziamo la posizione X tra 0 e 1 (per il mixing)
-    let mixedColor = colorInside.clone();
-    // Se la particella è a destra (>0), mixa verso il Teal. A sinistra resta Blu.
-    // Creiamo una sfumatura basata sulla posizione
-    const mixFactor = (x + 9) / 18; // Porta il range da -9/+9 a 0/1
-    mixedColor.lerp(colorOutside, mixFactor);
+const particlesCount = 1000; // Numero ottimale per sfere 3D
 
-    colorsArray[i] = mixedColor.r;
-    colorsArray[i+1] = mixedColor.g;
-    colorsArray[i+2] = mixedColor.b;
-}
+// Geometria: Vera sfera
+const geometry = new THREE.SphereGeometry(0.08, 16, 16); 
 
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3)); // Inviamo i colori
-
-// Materiale
-const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.065,     // Dimensione leggermente aumentata per compensare il minor numero
-    vertexColors: true, // <-- FONDAMENTALE: Abilita i colori personalizzati per punto
-    transparent: true,
-    opacity: 1.0,
-    blending: THREE.NormalBlending
+// Materiale: MeshStandardMaterial reagisce alla luce (Shading, Riflessi)
+const material = new THREE.MeshStandardMaterial({
+    color: 0xffffff, // Il colore base è bianco, lo tingeremo dopo
+    roughness: 0.4,  // Un po' lucido (0 = specchio, 1 = opaco)
+    metalness: 0.1   // Leggero effetto metallico
 });
 
-const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-scene.add(particlesMesh);
+const mesh = new THREE.InstancedMesh(geometry, material, particlesCount);
+scene.add(mesh);
+
+// --- POSIZIONAMENTO E COLORAZIONE (GRADIENTE) ---
+
+const dummy = new THREE.Object3D(); // Oggetto temporaneo per calcolare le posizioni
+const colorInside = new THREE.Color(0x0066ff); // Blu
+const colorOutside = new THREE.Color(0x00c9a7); // Teal
+
+for (let i = 0; i < particlesCount; i++) {
+    // Posizione Randomica
+    const x = (Math.random() - 0.5) * 20;
+    const y = (Math.random() - 0.5) * 12;
+    const z = (Math.random() - 0.5) * 10;
+
+    dummy.position.set(x, y, z);
+    
+    // Rotazione randomica per variare i riflessi
+    dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+    
+    // Scala leggermente variabile per naturalezza
+    const scale = Math.random() * 0.5 + 0.5; 
+    dummy.scale.set(scale, scale, scale);
+
+    dummy.updateMatrix();
+    mesh.setMatrixAt(i, dummy.matrix);
+
+    // CALCOLO GRADIENTE
+    const mixFactor = (x + 10) / 20; // Normalizza da 0 a 1 basato su X
+    const finalColor = colorInside.clone().lerp(colorOutside, mixFactor);
+    
+    mesh.setColorAt(i, finalColor);
+}
+
+mesh.instanceMatrix.needsUpdate = true; // Importante: notifica Three.js che le matrici sono pronte
+mesh.instanceColor.needsUpdate = true; // Importante: notifica i colori
 
 
-// --- GESTIONE MOUSE E RESIZE ---
+// --- GESTIONE MOUSE ---
 
 let mouseX = 0;
 let mouseY = 0;
@@ -110,15 +130,17 @@ const clock = new THREE.Clock();
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotazione lenta
-    particlesMesh.rotation.y = elapsedTime * 0.05;
+    // Rotazione lenta dell'intera nuvola
+    mesh.rotation.y = elapsedTime * 0.05;
+    mesh.rotation.x = elapsedTime * 0.02; // Leggera rotazione anche su X per mostrare il 3D
 
     // Mouse Parallax
     targetX = mouseX * 0.5;
     targetY = mouseY * 0.5;
     
-    particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
-    particlesMesh.rotation.y += 0.05 * (targetX - particlesMesh.rotation.y);
+    // Interpolazione fluida
+    mesh.rotation.x += 0.05 * (targetY - mesh.rotation.x);
+    mesh.rotation.y += 0.05 * (targetX - mesh.rotation.y);
 
     renderer.render(scene, camera);
     window.requestAnimationFrame(tick);
@@ -131,7 +153,7 @@ tick();
 // PARTE 2: GSAP ANIMATIONS
 // =================================================================
 
-// 1. HTML Animations
+// 1. HTML Animations (Invariato)
 gsap.to('.hero-content', {
     opacity: 1,
     y: 0,
@@ -166,21 +188,21 @@ sections.forEach(section => {
 
 // 2. THREE.JS Scroll Interactions
 
-// Zoom verso "Soluzioni"
-gsap.to(particlesMesh.scale, {
+// Effetto "Esplosione/Zoom" verso Soluzioni
+gsap.to(mesh.scale, {
     scrollTrigger: {
         trigger: "#soluzioni",
         start: "top bottom",
         end: "top top",
         scrub: 1
     },
-    x: 1.4, 
-    y: 1.4,
-    z: 1.4
+    x: 1.3, 
+    y: 1.3,
+    z: 1.3
 });
 
-// Rotazione Extra verso "Contatti"
-gsap.to(particlesMesh.rotation, {
+// Rotazione accentuata
+gsap.to(mesh.rotation, {
     scrollTrigger: {
         trigger: "#contatti",
         start: "top bottom",
@@ -189,10 +211,8 @@ gsap.to(particlesMesh.rotation, {
     z: Math.PI / 2 
 });
 
-
-// 3. Magnetic Buttons
+// Magnetic Buttons
 const magneticBtns = document.querySelectorAll('.magnetic');
-
 magneticBtns.forEach(btn => {
     btn.addEventListener('mousemove', (e) => {
         const position = btn.getBoundingClientRect();
@@ -206,13 +226,10 @@ magneticBtns.forEach(btn => {
             ease: "power2.out"
         });
     });
-
     btn.addEventListener('mouseleave', () => {
-        gsap.to(btn, {
-            x: 0,
-            y: 0,
-            duration: 0.5,
-            ease: "elastic.out(1, 0.3)"
+        gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+    });
+});
         });
     });
 });
