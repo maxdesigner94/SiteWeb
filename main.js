@@ -47,7 +47,7 @@ particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3
 // Materiale delle particelle (piccoli punti blu/teal)
 const particlesMaterial = new THREE.PointsMaterial({
     size: 0.025,
-    color: 0x0066ff, // Blu accento
+    color: 0x0055ff, // Blu accento
     transparent: true,
     opacity: 0.8,
     blending: THREE.AdditiveBlending
