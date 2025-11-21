@@ -10,8 +10,8 @@ const scene = new THREE.Scene();
 
 // Colore di sfondo della scena (matcha il CSS body)
 scene.background = new THREE.Color(0xf4f7f6); 
-// Nebbia originale (più densa per profondità)
-scene.fog = new THREE.FogExp2(0xf4f7f6, 0.002); // <-- TORNATO COME PRIMA
+// Nebbia molto leggera per non nascondere i punti lontani
+scene.fog = new THREE.FogExp2(0xf4f7f6, 0.001);
 
 const sizes = {
     width: window.innerWidth,
@@ -37,19 +37,20 @@ const particlesCount = 3000;
 const posArray = new Float32Array(particlesCount * 3);
 
 for(let i = 0; i < particlesCount * 3; i++) {
-    // Spargiamo le particelle (area originale più ampia)
-    posArray[i] = (Math.random() - 0.5) * 15; // <-- TORNATO COME PRIMA
+    // Manteniamo la distribuzione originale che ti piaceva
+    posArray[i] = (Math.random() - 0.5) * 15; 
 }
 
 particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
-// Materiale delle particelle (MODIFICA CHIAVE QUI)
+// Materiale delle particelle (MODIFICHE PER VISIBILITÀ MASSIMA)
 const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.03,      // <-- LEGGERMENTE più grandi dell'originale (0.025), ma eleganti
-    color: 0xff00ff, // <-- NUOVO COLORE: Arancione Elettrico/Corallo per massimo contrasto
+    size: 0.04,      // Dimensione bilanciata: ben visibile ma elegante
+    color: 0xff5722, // <-- TORNATO ALL'ARANCIONE CORALLO
     transparent: true,
-    opacity: 1.0,    // <-- Opacità originale
-    blending: THREE.AdditiveBlending
+    opacity: 1.0,    // <-- OPACITÀ MASSIMA (100%)
+    // Importante: NormalBlending rende i punti solidi sullo sfondo chiaro, non traslucidi
+    blending: THREE.NormalBlending 
 });
 
 const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
@@ -82,10 +83,8 @@ const clock = new THREE.Clock();
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotazione costante originale (lenta)
     particlesMesh.rotation.y = elapsedTime * 0.05;
 
-    // Effetto Mouse Parallax originale (fluido)
     targetX = mouseX * 0.5;
     targetY = mouseY * 0.5;
     
@@ -147,12 +146,12 @@ gsap.to(particlesMesh.scale, {
         end: "top top",
         scrub: 1
     },
-    x: 1.5, // <-- TORNATO COME PRIMA (Zoom elegante)
+    x: 1.5, 
     y: 1.5,
     z: 1.5
 });
 
-// CAMBIO COLORE ALLO SCROLL (Da Arancione a Verde Acqua)
+// CAMBIO COLORE ALLO SCROLL (Da Arancione a Verde Acqua scuro per visibilità)
 gsap.to(particlesMaterial.color, {
     scrollTrigger: {
         trigger: "#soluzioni",
@@ -160,7 +159,7 @@ gsap.to(particlesMaterial.color, {
         end: "bottom center",
         scrub: 1
     },
-    r: 0.0, g: 0.8, b: 0.6 // Il colore di destinazione rimane Teal/Verde acqua
+    r: 0.0, g: 0.6, b: 0.5 // Un verde acqua un po' più scuro per rimanere visibile
 });
 
 // Transizione verso la sezione "Contatti"
@@ -170,7 +169,7 @@ gsap.to(particlesMesh.rotation, {
         start: "top bottom",
         scrub: 2
     },
-    z: Math.PI / 2 // <-- TORNATO COME PRIMA
+    z: Math.PI / 2 
 });
 
 
