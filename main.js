@@ -2,13 +2,13 @@
 gsap.registerPlugin(ScrollTrigger);
 
 // =================================================================
-// PARTE 1: SETUP THREE.JS (REAL 3D + LIGHTING)
+// PARTE 1: SETUP THREE.JS (Cubetti 3D + Luce)
 // =================================================================
 
 const canvas = document.querySelector('#webgl-container');
 const scene = new THREE.Scene();
 
-// Sfondo "GHOST WHITE"
+// Sfondo "GHOST WHITE" (perfetto per il contrasto)
 const bgColor = 0xf3f5f8; 
 scene.background = new THREE.Color(bgColor); 
 scene.fog = new THREE.FogExp2(bgColor, 0.003); 
@@ -41,21 +41,23 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 1);
 dirLight.position.set(5, 5, 5); 
 scene.add(dirLight);
 
-const spotLight = new THREE.PointLight(0x0066ff, 0.5);
+// Luce d'accento bluastra (Match col colore primario)
+const spotLight = new THREE.PointLight(0x0055ff, 0.5); 
 spotLight.position.set(-5, -5, 2);
 scene.add(spotLight);
 
 
 // --- CREAZIONE PICCOLE SCATOLE 3D (INSTANCED MESH) ---
 
-const particlesCount = 650; // <-- NUMERO RIDOTTO ANCORA (da 1000 a 650)
+const particlesCount = 650; // Manteniamo il numero ridotto per pulizia
 
-// Geometria: ORA UN CUBO (BoxGeometry)
-const geometry = new THREE.BoxGeometry(0.12, 0.12, 0.12); // Dimensioni delle piccole scatole
+// Geometria: Cubo
+const geometry = new THREE.BoxGeometry(0.12, 0.12, 0.12); 
 
 // Materiale (reagisce alle luci)
 const material = new THREE.MeshStandardMaterial({
-    color: 0xffffff, 
+    // Impostiamo direttamente il colore base del materiale
+    color: 0x0055ff, // <-- COLORE BLU ELETTRICO ORIGINALE
     roughness: 0.4,  
     metalness: 0.1   
 });
@@ -63,39 +65,30 @@ const material = new THREE.MeshStandardMaterial({
 const mesh = new THREE.InstancedMesh(geometry, material, particlesCount);
 scene.add(mesh);
 
-// --- POSIZIONAMENTO E COLORAZIONE (GRADIENTE) ---
-
+// Dobbiamo aggiornare il ciclo per eliminare la logica del gradiente (InstanceColor)
 const dummy = new THREE.Object3D(); 
-const colorInside = new THREE.Color(0x0066ff); // Blu
-const colorOutside = new THREE.Color(0x00c9a7); // Teal
 
 for (let i = 0; i < particlesCount; i++) {
-    // Posizione Randomica (Distribuzione leggermente più ampia per mostrare i cubi)
-    const x = (Math.random() - 0.5) * 25; // Ampiezza X aumentata
+    // Posizione Randomica
+    const x = (Math.random() - 0.5) * 25; 
     const y = (Math.random() - 0.5) * 15;
     const z = (Math.random() - 0.5) * 12;
 
     dummy.position.set(x, y, z);
     
-    // Rotazione randomica per mostrare le facce dei cubi
+    // Rotazione randomica 
     dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
     
     // Scala leggermente variabile
-    const scale = Math.random() * 0.7 + 0.3; // Minore per mantenere "piccole"
+    const scale = Math.random() * 0.7 + 0.3; 
     dummy.scale.set(scale, scale, scale);
 
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
-
-    // CALCOLO GRADIENTE (basato sulla X)
-    const mixFactor = (x + 12.5) / 25; // Normalizza X da 0 a 1 per il range [-12.5, 12.5]
-    const finalColor = colorInside.clone().lerp(colorOutside, mixFactor);
-    
-    mesh.setColorAt(i, finalColor);
 }
 
 mesh.instanceMatrix.needsUpdate = true; 
-mesh.instanceColor.needsUpdate = true; 
+// mesh.instanceColor.needsUpdate = false; // Non serve più aggiornare i colori individuali
 
 
 // --- GESTIONE MOUSE ---
@@ -123,11 +116,9 @@ const clock = new THREE.Clock();
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotazione lenta dell'intera rete di scatole
-    mesh.rotation.y = elapsedTime * 0.04; // Lievemente più lenta
+    mesh.rotation.y = elapsedTime * 0.04; 
     mesh.rotation.x = elapsedTime * 0.02; 
 
-    // Mouse Parallax
     targetX = mouseX * 0.5;
     targetY = mouseY * 0.5;
     
@@ -180,6 +171,8 @@ sections.forEach(section => {
 
 // 2. THREE.JS Scroll Interactions
 
+// Nota: Dobbiamo rimuovere l'animazione di cambio colore poiché il materiale ora ha un solo colore fisso.
+
 // Effetto "Esplosione/Zoom" verso Soluzioni
 gsap.to(mesh.scale, {
     scrollTrigger: {
@@ -188,7 +181,7 @@ gsap.to(mesh.scale, {
         end: "top top",
         scrub: 1
     },
-    x: 1.2, // Scala un po' meno per non rendere i cubi troppo grandi
+    x: 1.2, 
     y: 1.2,
     z: 1.2
 });
@@ -203,7 +196,7 @@ gsap.to(mesh.rotation, {
     z: Math.PI / 2 
 });
 
-// Magnetic Buttons
+// Magnetic Buttons (Invariato)
 const magneticBtns = document.querySelectorAll('.magnetic');
 magneticBtns.forEach(btn => {
     btn.addEventListener('mousemove', (e) => {
