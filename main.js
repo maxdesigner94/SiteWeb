@@ -8,10 +8,10 @@ gsap.registerPlugin(ScrollTrigger);
 const canvas = document.querySelector('#webgl-container');
 const scene = new THREE.Scene();
 
-// Colore di sfondo della scena (deve matchare il CSS body per fusione perfetta)
+// Colore di sfondo della scena (matcha il CSS body)
 scene.background = new THREE.Color(0xf4f7f6); 
-// Aggiungi una leggera nebbia per profondità
-scene.fog = new THREE.FogExp2(0xf4f7f6, 0.002);
+// Nebbia originale (più densa per profondità)
+scene.fog = new THREE.FogExp2(0xf4f7f6, 0.002); // <-- TORNATO COME PRIMA
 
 const sizes = {
     width: window.innerWidth,
@@ -25,31 +25,30 @@ scene.add(camera);
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
-    alpha: true // Importante per la trasparenza se necessaria
+    alpha: true
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 // --- CREAZIONE OGGETTO 3D: Nuvola di Particelle Astratta ---
-// Non usiamo modelli pesanti, ma generiamo geometricamente dei punti.
 const particlesGeometry = new THREE.BufferGeometry();
-const particlesCount = 3000; // Numero di particelle
+const particlesCount = 3000;
 
 const posArray = new Float32Array(particlesCount * 3);
 
 for(let i = 0; i < particlesCount * 3; i++) {
-    // Spargiamo le particelle in uno spazio randomico
-    posArray[i] = (Math.random() - 0.5) * 15;
+    // Spargiamo le particelle (area originale più ampia)
+    posArray[i] = (Math.random() - 0.5) * 15; // <-- TORNATO COME PRIMA
 }
 
 particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
-// Materiale delle particelle (piccoli punti blu/teal)
+// Materiale delle particelle (MODIFICA CHIAVE QUI)
 const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.025,
-    color: 0x0055ff, // Blu accento
+    size: 0.03,      // <-- LEGGERMENTE più grandi dell'originale (0.025), ma eleganti
+    color: 0xff5722, // <-- NUOVO COLORE: Arancione Elettrico/Corallo per massimo contrasto
     transparent: true,
-    opacity: 0.8,
+    opacity: 0.85,    // <-- Opacità originale
     blending: THREE.AdditiveBlending
 });
 
@@ -83,13 +82,13 @@ const clock = new THREE.Clock();
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotazione costante lenta
+    // Rotazione costante originale (lenta)
     particlesMesh.rotation.y = elapsedTime * 0.05;
 
-    // Effetto Mouse Parallax fluido
+    // Effetto Mouse Parallax originale (fluido)
     targetX = mouseX * 0.5;
     targetY = mouseY * 0.5;
-    // Interpolazione lineare per movimento fluido
+    
     particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
     particlesMesh.rotation.y += 0.05 * (targetX - particlesMesh.rotation.y);
 
@@ -125,9 +124,9 @@ sections.forEach(section => {
         {
             scrollTrigger: {
                 trigger: section,
-                start: "top 75%", // Inizia quando la sezione è al 75% della viewport
+                start: "top 75%",
                 end: "top 20%",
-                toggleActions: "play none none reverse", // Riproduci all'entrata, inverti all'uscita
+                toggleActions: "play none none reverse",
             },
             opacity: 1,
             y: 0,
@@ -138,8 +137,7 @@ sections.forEach(section => {
     );
 });
 
-// 3. COLLEGAMENTO THREE.JS ALLO SCROLL (L'effetto PeachWeb)
-// Mentre scorri, la nuvola di particelle cambia forma e colore.
+// 3. COLLEGAMENTO THREE.JS ALLO SCROLL
 
 // Transizione verso la sezione "Soluzioni"
 gsap.to(particlesMesh.scale, {
@@ -147,13 +145,14 @@ gsap.to(particlesMesh.scale, {
         trigger: "#soluzioni",
         start: "top bottom",
         end: "top top",
-        scrub: 1 // L'animazione segue fluidamente lo scrollbar
+        scrub: 1
     },
-    x: 1.5,
+    x: 1.5, // <-- TORNATO COME PRIMA (Zoom elegante)
     y: 1.5,
     z: 1.5
 });
 
+// CAMBIO COLORE ALLO SCROLL (Da Arancione a Verde Acqua)
 gsap.to(particlesMaterial.color, {
     scrollTrigger: {
         trigger: "#soluzioni",
@@ -161,7 +160,7 @@ gsap.to(particlesMaterial.color, {
         end: "bottom center",
         scrub: 1
     },
-    r: 0.0, g: 0.8, b: 0.6 // Cambia colore verso il verde acqua (Teal)
+    r: 0.0, g: 0.8, b: 0.6 // Il colore di destinazione rimane Teal/Verde acqua
 });
 
 // Transizione verso la sezione "Contatti"
@@ -169,14 +168,13 @@ gsap.to(particlesMesh.rotation, {
     scrollTrigger: {
         trigger: "#contatti",
         start: "top bottom",
-        scrub: 2 // Scrub più lento per effetto "pesante"
+        scrub: 2
     },
-    z: Math.PI / 2 // Ruota la nuvola di 90 gradi
+    z: Math.PI / 2 // <-- TORNATO COME PRIMA
 });
 
 
-// 4. EXTRA: BOTTONI MAGNETICI (Tocco di classe UX)
-// I bottoni seguono leggermente il cursore quando ci passi sopra.
+// 4. EXTRA: BOTTONI MAGNETICI
 const magneticBtns = document.querySelectorAll('.magnetic');
 
 magneticBtns.forEach(btn => {
@@ -186,8 +184,8 @@ magneticBtns.forEach(btn => {
         const y = e.clientY - position.top - position.height / 2;
 
         gsap.to(btn, {
-            x: x * 0.3, // Forza magnetica orizzontale
-            y: y * 0.5, // Forza magnetica verticale
+            x: x * 0.3,
+            y: y * 0.5,
             duration: 0.3,
             ease: "power2.out"
         });
@@ -198,7 +196,7 @@ magneticBtns.forEach(btn => {
             x: 0,
             y: 0,
             duration: 0.5,
-            ease: "elastic.out(1, 0.3)" // Rimbalzo elastico al ritorno
+            ease: "elastic.out(1, 0.3)"
         });
     });
 });
