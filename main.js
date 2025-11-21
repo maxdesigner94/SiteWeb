@@ -230,6 +230,4 @@ magneticBtns.forEach(btn => {
         gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
     });
 });
-        });
-    });
-});
+        
