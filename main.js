@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 const canvas = document.querySelector('#webgl-container');
 const scene = new THREE.Scene();
 
-// Sfondo "GHOST WHITE" (perfetto per il contrasto)
+// Sfondo "GHOST WHITE"
 const bgColor = 0xf3f5f8; 
 scene.background = new THREE.Color(bgColor); 
 scene.fog = new THREE.FogExp2(bgColor, 0.003); 
@@ -41,23 +41,23 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 1);
 dirLight.position.set(5, 5, 5); 
 scene.add(dirLight);
 
-// Luce d'accento bluastra (Match col colore primario)
-const spotLight = new THREE.PointLight(0x0055ff, 0.5); 
+// Luce d'accento (si abbina al nuovo colore soft)
+const spotLight = new THREE.PointLight(0x7393b3, 0.5); // <-- NUOVO COLORE SOFT
 spotLight.position.set(-5, -5, 2);
 scene.add(spotLight);
 
 
 // --- CREAZIONE PICCOLE SCATOLE 3D (INSTANCED MESH) ---
 
-const particlesCount = 650; // Manteniamo il numero ridotto per pulizia
+const particlesCount = 650; 
 
 // Geometria: Cubo
 const geometry = new THREE.BoxGeometry(0.12, 0.12, 0.12); 
 
 // Materiale (reagisce alle luci)
 const material = new THREE.MeshStandardMaterial({
-    // Impostiamo direttamente il colore base del materiale
-    color: 0x0055ff, // <-- COLORE BLU ELETTRICO ORIGINALE
+    // NUOVO COLORE: AZZURRO POLVERE/DUSTY BLUE (#7393b3)
+    color: 0x7393b3, 
     roughness: 0.4,  
     metalness: 0.1   
 });
@@ -88,7 +88,6 @@ for (let i = 0; i < particlesCount; i++) {
 }
 
 mesh.instanceMatrix.needsUpdate = true; 
-// mesh.instanceColor.needsUpdate = false; // Non serve più aggiornare i colori individuali
 
 
 // --- GESTIONE MOUSE ---
@@ -170,8 +169,6 @@ sections.forEach(section => {
 });
 
 // 2. THREE.JS Scroll Interactions
-
-// Nota: Dobbiamo rimuovere l'animazione di cambio colore poiché il materiale ora ha un solo colore fisso.
 
 // Effetto "Esplosione/Zoom" verso Soluzioni
 gsap.to(mesh.scale, {
