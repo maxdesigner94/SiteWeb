@@ -8,8 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 const canvas = document.querySelector('#webgl-container');
 const scene = new THREE.Scene();
 
-// 1. SFONDO AGGIORNATO: #e8ecf0 (Grigio-Azzurro Tecnico)
-// Questo colore fa risaltare il blu molto meglio del bianco puro.
+// Colore Sfondo: Grigio-Azzurro Tecnico (lo stesso del CSS)
 const bgColor = 0xe8ecf0;
 scene.background = new THREE.Color(bgColor); 
 scene.fog = new THREE.FogExp2(bgColor, 0.002);
@@ -26,30 +25,59 @@ scene.add(camera);
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
-    alpha: false // Alpha false perché gestiamo il colore nel background della scena
+    alpha: false 
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// --- CREAZIONE OGGETTO 3D ---
+
+// --- CREAZIONE OGGETTO 3D CON GRADIENTE ---
+
+// 1. Riduciamo il numero per pulizia
+const particlesCount = 1200; // <-- RIDOTTO DA 3000 A 1200
+
 const particlesGeometry = new THREE.BufferGeometry();
-const particlesCount = 3000;
-
 const posArray = new Float32Array(particlesCount * 3);
+const colorsArray = new Float32Array(particlesCount * 3); // Array per i colori individuali
 
-for(let i = 0; i < particlesCount * 3; i++) {
-    posArray[i] = (Math.random() - 0.5) * 15; 
+// Definiamo i due colori del gradiente (Stessi del CSS .accent-text)
+const colorInside = new THREE.Color(0x0066ff); // Blu Elettrico
+const colorOutside = new THREE.Color(0x00c9a7); // Verde Acqua (Teal)
+
+for(let i = 0; i < particlesCount * 3; i+=3) {
+    // Posizione X, Y, Z
+    // Allarghiamo un po' la X per apprezzare meglio il gradiente
+    const x = (Math.random() - 0.5) * 18; 
+    const y = (Math.random() - 0.5) * 10;
+    const z = (Math.random() - 0.5) * 10;
+
+    posArray[i] = x;
+    posArray[i+1] = y;
+    posArray[i+2] = z;
+
+    // CALCOLO DEL GRADIENTE
+    // Normalizziamo la posizione X tra 0 e 1 (per il mixing)
+    let mixedColor = colorInside.clone();
+    // Se la particella è a destra (>0), mixa verso il Teal. A sinistra resta Blu.
+    // Creiamo una sfumatura basata sulla posizione
+    const mixFactor = (x + 9) / 18; // Porta il range da -9/+9 a 0/1
+    mixedColor.lerp(colorOutside, mixFactor);
+
+    colorsArray[i] = mixedColor.r;
+    colorsArray[i+1] = mixedColor.g;
+    colorsArray[i+2] = mixedColor.b;
 }
 
 particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3)); // Inviamo i colori
 
-// 2. MATERIALE AGGIORNATO: Blu #0066ff
+// Materiale
 const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.055,     // Dimensione generosa per essere ben visibile
-    color: 0x0066ff, // <-- ESATTO COLORE DI "INTELLIGENTE" (Accent Blue)
+    size: 0.065,     // Dimensione leggermente aumentata per compensare il minor numero
+    vertexColors: true, // <-- FONDAMENTALE: Abilita i colori personalizzati per punto
     transparent: true,
-    opacity: 1.0,    // Solidità massima
-    blending: THREE.NormalBlending // Niente trasparenze strane, colore puro e solido
+    opacity: 1.0,
+    blending: THREE.NormalBlending
 });
 
 const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
@@ -82,8 +110,10 @@ const clock = new THREE.Clock();
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
+    // Rotazione lenta
     particlesMesh.rotation.y = elapsedTime * 0.05;
 
+    // Mouse Parallax
     targetX = mouseX * 0.5;
     targetY = mouseY * 0.5;
     
@@ -144,24 +174,12 @@ gsap.to(particlesMesh.scale, {
         end: "top top",
         scrub: 1
     },
-    x: 1.5, 
-    y: 1.5,
-    z: 1.5
+    x: 1.4, 
+    y: 1.4,
+    z: 1.4
 });
 
-// Cambio Colore: Dal Blu (#0066ff) al Verde Acqua (#00c9a7)
-// Segue esattamente il gradiente del testo CSS
-gsap.to(particlesMaterial.color, {
-    scrollTrigger: {
-        trigger: "#soluzioni",
-        start: "top center",
-        end: "bottom center",
-        scrub: 1
-    },
-    r: 0.0, g: 0.78, b: 0.65 // Corrisponde circa a #00c9a7 (Teal)
-});
-
-// Rotazione verso "Contatti"
+// Rotazione Extra verso "Contatti"
 gsap.to(particlesMesh.rotation, {
     scrollTrigger: {
         trigger: "#contatti",
