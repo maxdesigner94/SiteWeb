@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>NexBox | Soluzioni Logistiche Avanzate & Packaging B2B</title>
+    <meta name="description" content="Partner B2B per packaging sostenibile e logistica integrata. Tecnologia 3D per l'ottimizzazione dei flussi di magazzino per grossisti.">
+    <meta name="keywords" content="logistica b2b, packaging ingrosso, ottimizzazione magazzino, imballaggi sostenibili, supply chain management">
+    <meta property="og:title" content="NexBox - Il futuro della logistica B2B">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <canvas id="webgl-container"></canvas>
+
+    <nav>
+        <div class="logo">NexBox<span>.</span></div>
+        <div class="nav-links">
+            <ul>
+                <li><a href="#soluzioni">Soluzioni</a></li>
+                <li><a href="#tecnologia">Tecnologia</a></li>
+                <li><a href="#contatti" class="btn-nav magnetic">Contattaci</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section id="hero">
+            <div class="hero-content fade-in">
+                <h1>Logistica B2B <br>Fluidificata.</h1>
+                <p>Ridefiniamo il packaging e la supply chain per i grossisti moderni attraverso l'analisi dati e materiali sostenibili.</p>
+                <a href="#soluzioni" class="btn-main magnetic">Esplora le soluzioni</a>
+            </div>
+        </section>
+
+        <section id="soluzioni" class="scroll-section right-align">
+            <div class="content-block fade-up">
+                <h2>Packaging <span class="accent-text">Intelligente</span></h2>
+                <p>Le nostre scatole non sono solo contenitori. Integrano sensori IoT passivi per un tracciamento in tempo reale senza precedenti nella filiera all'ingrosso.</p>
+                <ul class="feature-list">
+                    <li>Materiali 100% Riciclati</li>
+                    <li>RFID Ready</li>
+                    <li>Design Modulare</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="tecnologia" class="scroll-section left-align">
+            <div class="content-block fade-up">
+                <h2>Ottimizzazione <span class="accent-text">Volumetrica</span></h2>
+                <p>Utilizziamo algoritmi predittivi per suggerire i formati di imballaggio ideali, riducendo lo spazio vuoto nei container del 35%.</p>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <h3>-35%</h3>
+                        <p>Volume Sprecatto</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>24h</h3>
+                        <p>Spedizione Campioni</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contatti">
+            <div class="contact-wrapper fade-up">
+                <h2>Parla con i nostri esperti</h2>
+                <p>Richiedi un'analisi gratuita dei tuoi flussi logistici attuali.</p>
+                
+                <form id="b2b-form">
+                    <div class="input-row">
+                        <input type="text" placeholder="Nome Azienda" required>
+                        <input type="email" placeholder="Email Business" required>
+                    </div>
+                    <textarea placeholder="Di cosa avete bisogno?" rows="4" required></textarea>
+                    <button type="submit" class="btn-main magnetic">Invia Richiesta B2B</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 NexBox Wholesale Solutions. Designed for the future.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <script src="main.js"></script>
+</body>
+</html>
